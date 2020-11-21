@@ -1,0 +1,25 @@
+debug: true
+logger:
+  name: log/yiningzeng.log # 支持输入完整路径
+  withRotationTime: 24 # 设置日志分割的时间，隔多久分割一次，默认一天
+  withRotationCount: 60 # 日志保留的个数
+collect:
+  enable: true
+  #lastID: 92100 # 定时采集记录的最后的DBBoardID ！！！！！！已经弃用!改为使用下面的数据
+  incremental: false # 是否增量采集
+  powerAiAssetsSavePath: /home/baymin/daily-work/go/src/retrial/AOIBin/PowerAiAssets/
+detect:
+  enable: true
+mr:
+  outtxt: /home/baymin/daily-work/go/src/retrial/AOIBin/outtxt/
+  outimg: /home/baymin/daily-work/go/src/retrial/AOIBin/outimg/
+  pcbimg: /home/baymin/daily-work/go/src/retrial/AOIBin/pcbimage/
+  dataVersion:
+    versionCol: 2 # 数据版本号的列
+    707:
+      idRow: 2 # 数据每个版本对应的DBBoardID所在的行数，从1开始；
+      idCol: 2 # 列数，从1开始；
+    713:
+      idRow: 2
+      idCol: 3
+
