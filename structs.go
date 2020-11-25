@@ -22,7 +22,7 @@ type Asset struct {
 	Size   Size   `json:"size"`
 	State  int    `json:"state"`
 	Type   int    `json:"type"`
-	Sort   string `json:"sort"`
+	Tag   string `json:"tag"`
 }
 
 type Size struct {
