@@ -1,9 +1,9 @@
 package main
 
 import (
+	logger "github.com/sirupsen/logrus"
 	"gocv.io/x/gocv"
 	"image"
-	"log"
 	"time"
 )
 
@@ -18,11 +18,20 @@ func CameraDemo() {
 		window.WaitKey(1)
 	}
 }
-func Crop(imgPath string, savePath string, rect image.Rectangle) {
+
+func Crop(img gocv.Mat, rect image.Rectangle, savePath string) {
+	logger.Debug(savePath)
+	t1:=time.Now()  //获取本地现在时间
+	img = img.Region(rect)
+	gocv.IMWrite(savePath, img)
+	logger.Debug(time.Now().Sub(t1))
+}
+
+func CropByPath(imgPath string, savePath string, rect image.Rectangle) {
 	t1:=time.Now()  //获取本地现在时间
 	img := gocv.IMRead(imgPath, gocv.IMReadColor)
 	defer img.Close()
 	img = img.Region(rect)
 	gocv.IMWrite(savePath, img)
-	log.Printf("Crop spend: %s", time.Now().Sub(t1))
+	logger.Debug(time.Now().Sub(t1))
 }

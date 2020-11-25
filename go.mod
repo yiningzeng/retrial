@@ -12,6 +12,8 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.3 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/msterzhang/gpool v0.0.0-20200617034951-6e09fbabb0d0
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rjeczalik/notify v0.9.2
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/afero v1.4.1

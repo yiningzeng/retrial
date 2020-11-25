@@ -4,22 +4,38 @@ logger:
   withRotationTime: 24 # 设置日志分割的时间，隔多久分割一次，默认一天
   withRotationCount: 60 # 日志保留的个数
 collect:
+  collectTime: 11:10 # 每天采集的时间
+  threadNum: 10 # 够用了就行，加线程数会造成cpu和内存剧增，如果硬件达不到会死机
   enable: true
-  #lastID: 92100 # 定时采集记录的最后的DBBoardID ！！！！！！已经弃用!改为使用下面的数据
   incremental: false # 是否增量采集
-  powerAiAssetsSavePath: /home/baymin/daily-work/go/src/retrial/AOIBin/PowerAiAssets/
+  powerAiAssetsSavePath: /home/baymin/daily-work/Retrial-Test/PowerAiAssets/
 detect:
   enable: true
 mr:
-  outtxt: /home/baymin/daily-work/go/src/retrial/AOIBin/outtxt/
-  outimg: /home/baymin/daily-work/go/src/retrial/AOIBin/outimg/
-  pcbimg: /home/baymin/daily-work/go/src/retrial/AOIBin/pcbimage/
+  mysqlHost: 192.168.31.77
+#  outtxt: /home/baymin/go/src/test/outtxt/
+  outtxt: /home/baymin/daily-work/Retrial-Test/outtext-test/
+  outimg: /home/baymin/go/src/test/outimg/
+#  pcbimg: /home/baymin/go/src/test/pcbimage/
+  pcbimg: /home/baymin/daily-work/Retrial-Test/pcbimage/
+  fileSuffix: .dat # 需要采集的文件后缀名
+  excludeFiles: ComponentMisReport.dat,test.dat # 排除掉的文件名，不采集在次列表内的文件名用英文逗号分隔
   dataVersion:
     versionCol: 2 # 数据版本号的列
     707:
+      imgDateCol:  26 # 对应的是第二行的带秒的时间的列数！只有这个时间是准确的，数据库时间会有时差造成读取不到数据库
       idRow: 2 # 数据每个版本对应的DBBoardID所在的行数，从1开始；
       idCol: 2 # 列数，从1开始；
+      xCol: 3
+      yCol: 4
+      wCol: 5
+      hCol: 6
     713:
+      imgDateCol:  27 # 待验证版本
       idRow: 2
       idCol: 3
+      xCol: 3
+      yCol: 4
+      wCol: 5
+      hCol: 6
 
