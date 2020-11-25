@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -42,6 +43,7 @@ func DoCollectMingrui() {
 
 // 2. 读取明锐数据文本信息
 func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
+	defer pool.Done()
 	if fs == nil {
 		fs = afero.NewOsFs()
 	}
@@ -49,14 +51,12 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 	// 是否增量采集和是否已经采集过
 	if viper.GetBool("collect.incremental") && isExist {
 		logger.WithFields(logger.Fields{"fileName": fileName}).Debug("已执行过")
-		pool.Done()
 		return
 	}
 	logger.WithFields(logger.Fields{"fileName": fileName}).Debug("开始采集")
 	sBytes, er := afero.ReadFile(fs, fileName)
 	if er != nil {
 		logger.WithFields(logger.Fields{"fileName": fileName, "error": er.Error()}).Error("FileRead:43:打开文件失败")
-		pool.Done()
 		return
 	} else {
 		connect := string(sBytes) // 这里已经是明锐的所有文本信息了
@@ -68,21 +68,18 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 		}
 		if DBBoardID == -1 { // 表明这个数据查询不到记录，说明维修站还未复判 等待下一次处理吧
 			//_ = afero.WriteFile(fs, fileName + ".done", nil, 0755)
-			pool.Done()
 			return
 		}
 		// 2. 查询数据库相应的记录信息
 		board, err := DoBoardQuery(DBBoardID)
 		if err !=nil {
 			logger.WithFields(logger.Fields{"DBBoardID": DBBoardID}).Warn("查询不到数据")
-			pool.Done()
 			return
 		}
 		dataRes := DoFaultsQuery(DBBoardID)
 		if len(dataRes) == 0 {
 			logger.WithFields(logger.Fields{"DBBoardID": DBBoardID}).Warn("查询不到数据")
 			_ = afero.WriteFile(fs, fileName + ".done", nil, 0755)
-			pool.Done()
 			return
 		}
 		src := fmt.Sprintf("%s/%s/%s/%s/__%s.png",
@@ -94,10 +91,10 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 		isExist, _ = afero.Exists(fs, src)
 		if !isExist {
 			logger.WithField("src", src).Error("图片不存在")
-			pool.Done()
 			return
 		}
 		img := gocv.IMRead(src, gocv.IMReadColor)
+		defer img.Close()
 		for _, v := range dataRes {
 			logger.WithFields(logger.Fields{"ComponentName": v.ComponentName, "DBBoardID": DBBoardID}).Info("通过DBBoardID查询的结果")
 			// 3. 每个结果生成一个文件夹
@@ -110,7 +107,6 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 			err = fs.MkdirAll(savePath, 0755)
 			if err != nil {
 				logger.WithField("dir", baseDir).Error("创建文件夹失败")
-				pool.Done()
 				continue
 			}
 			id := ""
@@ -152,9 +148,9 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 			}
 			// 5. 最后再生成对应的powerai的json文件，按照(ok/ng)-DBBoardID-SubBoardID-ComponentID.json来存储
 		}
-		img.Close()
-		pool.Done()
 		_ = afero.WriteFile(fs, fileName + ".done", nil, 0755)
+		connect = ""
+		runtime.GC()
 		//compile := regexp.MustCompile()
 		//
 		//submatch := compile.FindAllSubmatch(contents, -1)

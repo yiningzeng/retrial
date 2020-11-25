@@ -6,6 +6,7 @@ import (
 	"github.com/jasonlvhit/gocron"
 	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"runtime"
 )
 
 func IniDefaultConfig() {
@@ -61,6 +62,7 @@ func Detect() {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	IniDefaultConfig()
 	MysqlIni()
 	//bord, err := DoBoardQuery(12)
@@ -87,7 +89,7 @@ func main() {
 	//fileNae := "/home/baymin/daily-work/go/src/retrial/AOIBin/test/0000000002ND.dat"
 	//FileGetMingRuiDBBoardID(fileNae, afero.NewOsFs())
 	//FileRead("/home/baymin/daily-work/go/src/retrial/AOIBin/test/0000000002ND.dat")
-
+	_ = gocron.Every(1).Minute().Do(runtime.GC)
 	if viper.GetBool("Collect.enable") {
 		go Collect()
 	}
