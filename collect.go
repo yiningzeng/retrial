@@ -61,7 +61,7 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 	} else {
 		connect := string(sBytes) // 这里已经是明锐的所有文本信息了
 		// 1. 获取明锐数据的记录ID
-		DBBoardID, imgNameDateStr, DataVersion := FileGetMingRuiDBBoardID(connect)
+		DBBoardID, imgNameDateStr, DataVersion := FileGetMingRuiDBBoardID(&connect)
 		changeTime, err := time.Parse("2006-01-02 15:04:05", strings.ReplaceAll(imgNameDateStr, "/", "-"))
 		if err != nil {
 			logger.Error(err.Error())
@@ -128,8 +128,8 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 			jsonSavePath := fmt.Sprintf("%s/%s.json", savePath, id)
 			isExist, _ = afero.Exists(fs, imgSavePath)
 			if !isExist { //只有在不存在的时候再裁剪
-				rect := GetImageRectangle(DataVersion, connect, v.ComponentName+".*?\n")
-				Crop(img, rect, imgSavePath)
+				rect := GetImageRectangle(DataVersion, &connect, v.ComponentName+".*?\n")
+				Crop(&img, rect, imgSavePath)
 				asset.Asset.Size = Size{Width: rect.Max.X - rect.Min.X, Height: rect.Max.Y - rect.Min.Y}
 				asset.Asset.Id = id
 				asset.Asset.Name = id + ".jpg"
@@ -161,9 +161,9 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 
 // 明锐数据清洗
 // 主要是加载一行数据，根绝传进来的列来用,分隔，取出对应列的数据
-func DataCleaningMingRui(content string, col int) string {
+func DataCleaningMingRui(content *string, col int) string {
 	n := []int{col}
-	input := strings.NewReader(content)
+	input := strings.NewReader(*content)
 	output := bytes.NewBufferString("")
 	bb := output.String()
 	logger.Println(bb)
@@ -181,18 +181,18 @@ func DataCleaningMingRui(content string, col int) string {
 }
 
 // 通过传入的.dat文件名获取数据库对应的DBBoardID
-func FileGetMingRuiDBBoardID(content string) (int, string, string) {
+func FileGetMingRuiDBBoardID(content *string) (int, string, string) {
 	DBBoardID := -1
 	version := ""
 	imgFileDate := ""
-	lines := strings.Split(content, "\n")
+	lines := strings.Split(*content, "\n")
 	for i := 0; i < len(lines); i++ {
 		line := strings.ReplaceAll(lines[i], "\n", "")//以'\n'为结束符读入一行
 		if i == 0 {
-			version = DataCleaningMingRui(line, viper.GetInt("mr.dataVersion.versionCol"))
+			version = DataCleaningMingRui(&line, viper.GetInt("mr.dataVersion.versionCol"))
 		} else if i == viper.GetInt("mr.dataVersion." + version + ".idRow") - 1 { // 这里为了外面配置文件里行数和列数都是从第一行开始，所以要减一
-			imgFileDate = DataCleaningMingRui(line,  viper.GetInt("mr.dataVersion." + version + ".imgDateCol"))
-			DBBoardID, _ = strconv.Atoi(DataCleaningMingRui(line, viper.GetInt("mr.dataVersion." + version + ".idCol")))
+			imgFileDate = DataCleaningMingRui(&line,  viper.GetInt("mr.dataVersion." + version + ".imgDateCol"))
+			DBBoardID, _ = strconv.Atoi(DataCleaningMingRui(&line, viper.GetInt("mr.dataVersion." + version + ".idCol")))
 			logger.WithFields(logger.Fields{"DataVersion": version, "DBBoardID": DBBoardID}).Info("数据库的编号")
 			break
 		}
@@ -201,9 +201,9 @@ func FileGetMingRuiDBBoardID(content string) (int, string, string) {
 	return DBBoardID, imgFileDate, version
 }
 
-func GetImageRectangle(dataVersion string, content string, reg string) image.Rectangle{
+func GetImageRectangle(dataVersion string, content *string, reg string) image.Rectangle{
 	re := regexp.MustCompile(reg)
-	out := strings.Split(re.FindStringSubmatch(content)[0], ",")
+	out := strings.Split(re.FindStringSubmatch(*content)[0], ",")
 	x, _ := strconv.Atoi(out[viper.GetInt("mr.dataVersion."+dataVersion+".xCol") - 1])
 	y, _ := strconv.Atoi(out[viper.GetInt("mr.dataVersion."+dataVersion+".yCol") - 1])
 	w, _ := strconv.Atoi(out[viper.GetInt("mr.dataVersion."+dataVersion+".wCol") - 1])

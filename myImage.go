@@ -19,11 +19,12 @@ func CameraDemo() {
 	}
 }
 
-func Crop(img gocv.Mat, rect image.Rectangle, savePath string) {
+func Crop(img *gocv.Mat, rect image.Rectangle, savePath string) {
 	logger.Debug(savePath)
 	t1:=time.Now()  //获取本地现在时间
-	img = img.Region(rect)
-	gocv.IMWrite(savePath, img)
+	img2 := img.Region(rect)
+	defer img2.Close()
+	gocv.IMWrite(savePath, img2)
 	logger.Debug(time.Now().Sub(t1))
 }
 
