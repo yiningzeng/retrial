@@ -116,6 +116,8 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 					State:  2,
 					Type:   1,
 				},
+				Regions: []string{},
+				Version: "sort-5.1.1",
 			}
 			if v.ConfirmResult !=0 { //ng
 				asset.Asset.Sort = "NG"

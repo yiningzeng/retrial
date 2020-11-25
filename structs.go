@@ -10,6 +10,8 @@ import (
 
 type PowerAiAsset struct {
 	Asset Asset `json:"asset"`
+	Regions []string `json:"regions"`
+	Version string `json:"version"`
 }
 
 type Asset struct {
