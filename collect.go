@@ -120,10 +120,10 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 				Version: "sort-5.1.1",
 			}
 			if v.ConfirmResult !=0 { //ng
-				asset.Asset.Tag = "NG"
+				asset.Asset.Sort = "NG"
 				id = fmt.Sprintf("NG_%d-%d-%d", v.DBBoardID, v.SubBoardID, v.ComponentID)
 			} else { //ok
-				asset.Asset.Tag = "OK"
+				asset.Asset.Sort = "OK"
 				id = fmt.Sprintf("OK_%d-%d-%d", v.DBBoardID, v.SubBoardID, v.ComponentID)
 			}
 			imgSavePath := fmt.Sprintf("%s/%s.jpg", savePath, id)
