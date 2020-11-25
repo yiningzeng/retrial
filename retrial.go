@@ -47,12 +47,10 @@ func IniDefaultConfig() {
 // 用于采集人工复判的结果数据
 func Collect() {
 	if viper.GetBool("debug") {
-		_ = gocron.Every(30).Second().Do(runtime.GC)
 		DoCollectMingrui()
 		// Do jobs without params
-		_ = gocron.Every(10).Minute().Do(DoCollectMingrui)
+		_ = gocron.Every(5).Minute().Do(DoCollectMingrui)
 	} else {
-		_ = gocron.Every(5).Minute().Do(runtime.GC)
 		_ = gocron.Every(1).Day().At(viper.GetString("collect.collectTime")).Do(DoCollectMingrui)
 	}
 	gocron.Start()
@@ -65,7 +63,6 @@ func Detect() {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	_ = gocron.Every(5).Minute().Do(runtime.GC)
 	IniDefaultConfig()
 	MysqlIni()
 	//bord, err := DoBoardQuery(12)
@@ -93,10 +90,10 @@ func main() {
 	//FileGetMingRuiDBBoardID(fileNae, afero.NewOsFs())
 	//FileRead("/home/baymin/daily-work/go/src/retrial/AOIBin/test/0000000002ND.dat")
 	if viper.GetBool("Collect.enable") {
-		Collect()
+		go Collect()
 	}
 	if viper.GetBool("Detect.enable") {
-		Detect()
+		go Detect()
 	}
 	go WatchDir(".")
 	//Crop("/home/baymin/daily-work/go/src/retrial/AOIBin/pcbimage/TESTTTT@/2020-11/17/NO1/__20201117192436.png",

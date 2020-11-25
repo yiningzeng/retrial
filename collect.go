@@ -149,7 +149,6 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 			// 5. 最后再生成对应的powerai的json文件，按照(ok/ng)-DBBoardID-SubBoardID-ComponentID.json来存储
 		}
 		_ = afero.WriteFile(fs, fileName + ".done", nil, 0755)
-		connect = ""
 		runtime.GC()
 		//compile := regexp.MustCompile()
 		//
