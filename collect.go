@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Guitarbum722/align"
 	"github.com/msterzhang/gpool"
+	"github.com/pkg/errors"
 	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -28,7 +29,7 @@ func DoCollectMingrui() {
 	_ = filepath.Walk(viper.GetString("mr.outtxt"), func(file string, info os.FileInfo, err error) error {
 		isDir, err := afero.IsDir(fs, file)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Errorf("%+v\n", errors.Wrap(err, "err"))
 		}
 		_, fileName := filepath.Split(file)
 		if !isDir && strings.HasSuffix(fileName, viper.GetString("mr.fileSuffix")) && !strings.Contains(viper.GetString("mr.excludeFiles"), fileName) {
@@ -64,7 +65,7 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 		DBBoardID, imgNameDateStr, DataVersion := FileGetMingRuiDBBoardID(&connect)
 		changeTime, err := time.Parse("2006-01-02 15:04:05", strings.ReplaceAll(imgNameDateStr, "/", "-"))
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Errorf("%+v\n", errors.Wrap(err, "err"))
 		}
 		if DBBoardID == -1 { // 表明这个数据查询不到记录，说明维修站还未复判 等待下一次处理吧
 			//_ = afero.WriteFile(fs, fileName + ".done", nil, 0755)
@@ -138,7 +139,7 @@ func FileRead(fileName string, fs afero.Fs, pool *gpool.Pool) {
 				asset.Asset.Path = "file:" + imgSavePath
 				jsonBytes, err := json.Marshal(asset)
 				if err != nil {
-					logger.Error("PowerAiAsset转json失败")
+					logger.Errorf("PowerAiAsset转json失败 :%+v\n", errors.Wrap(err, "err"))
 				}
 				var out bytes.Buffer
 				err = json.Indent(&out, jsonBytes, "", "\t")

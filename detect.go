@@ -49,6 +49,11 @@ func WatchDir(dir string) {
 					logger.WithField("filename", ev.Name).Debug("Write")
 					if strings.Contains(ev.Name, ".dat") {
 						logger.WithField("filename", ev.Name).Debug("analysis")
+						//
+						//if err != nil {
+						//	_ = errors.Wrap(err, "read failed")
+						//}
+						//defer conn.Close()
 					}
 				} else if ev.Op&fsnotify.Create == fsnotify.Create {
 					logger.WithField("filename", ev.Name).Debug("Create")

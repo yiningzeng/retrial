@@ -10,6 +10,7 @@ collect:
   incremental: false # 是否增量采集
   powerAiAssetsSavePath: /home/baymin/daily-work/Retrial-Test/PowerAiAssets/
 detect:
+  rabbitmq: amqp://baymin:baymin1024@192.168.31.77:5672/
   enable: true
 mr:
   mysqlHost: 192.168.31.77

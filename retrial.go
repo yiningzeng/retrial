@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/fsnotify/fsnotify"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jasonlvhit/gocron"
 	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	rabbitmq "retrial/tools"
 	"runtime"
 )
 
@@ -61,10 +63,40 @@ func Detect() {
 	logger.Println("我是检测室")
 }
 
+type TestPro struct {
+	msgContent   string
+}
+
+// 实现发送者
+func (t *TestPro) MsgContent() string {
+	return t.msgContent
+}
+
+// 实现接收者
+func (t *TestPro) Consumer(dataByte []byte) error {
+	fmt.Println(string(dataByte))
+	return nil
+}
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	IniDefaultConfig()
 	MysqlIni()
+
+	msg := fmt.Sprintf("这是测试任务")
+	t := &TestPro{
+		msg,
+	}
+	queueExchange := &rabbitmq.QueueExchange{
+		"work-test",
+		"rabbit.key",
+		"test.rabbit.mq",
+		"direct",
+	}
+	mq := rabbitmq.New(queueExchange)
+	mq.RegisterProducer(t)
+	mq.RegisterReceiver(t)
+	mq.Start()
 	//bord, err := DoBoardQuery(12)
 	//res := DoFaultsQuery(1213232)
 	//logger.Debug(res, err)
